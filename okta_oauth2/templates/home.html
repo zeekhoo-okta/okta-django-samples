@@ -1,0 +1,63 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="row">
+	<div class="col-md-2"><br />
+		<div class="affix">
+			<form action="/userinfo" method="POST">{% csrf_token %}
+				<div class="btn-group-vertical">
+			     	{% if tokens.accessToken and not userInfo %}
+			     	<input type="hidden" name="accessToken" value="{{tokens.accessToken}}">
+			     	<button type="submit" class="btn btn-lg btn-success" data-toggle="modal" data-target="#tokensModal">User Info</button>
+			     	{% endif %}
+				</div>
+			</form>
+			<form action="/introspect" method="POST">{% csrf_token %}
+				<div class="btn-group-vertical">
+					{% if tokens.accessToken %}
+			     	<input type="hidden" name="accessToken" value="{{tokens.accessToken}}">
+			     	<button type="submit" class="btn btn-lg btn-warning">Introspect</button>
+			     	{% endif %}
+			    </div>
+			</form>
+			<form action="/revocation" method="POST">{% csrf_token %}
+				<div class="btn-group-vertical">
+					{% if tokens.accessToken and not revocation %}
+			     	<input type="hidden" name="accessToken" value="{{tokens.accessToken}}">
+			     	<button type="submit" class="btn btn-lg btn-danger">Revocation</button>
+			     	{% endif %}
+			    </div>
+			</form>
+
+		</div>
+	</div>
+	<div class="col-md-1"></div>
+	<div class="col-md-9">
+		{% if tokens.accessToken %}
+		<h3>Access Token</h3>
+		<pre><code>{{tokens.accessToken}}</code></pre>
+		{% endif %}
+
+		{% if tokens.idToken %}
+		<h3>ID Token</h3>
+		<pre><code>{{tokens.idToken}}</code></pre>
+		{% endif %}
+
+		{% if userInfo %}
+		<h3>User Info</h3>
+		<pre><code>{{userInfo}}</code></pre>
+		{% endif %}
+
+		{% if introspect %}
+		<h3>Introspect Info</h3>
+		<pre><code>{{introspect}}</code></pre>
+		{% endif %}
+
+		{% if revocation %}
+		<h3>Revocation Info</h3>
+		<pre><code>{{revocation}}</code></pre>
+		{% endif %}
+	</div>
+</div>
+
+
+{% endblock %}
