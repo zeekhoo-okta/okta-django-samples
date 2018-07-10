@@ -8,8 +8,8 @@ from django.contrib.auth.decorators import login_required
 from .models import DiscoveryDocument, Config, TokenManager
 
 import json
-from .tokens import validate_token
-from .oauth_openid import call_token_endpoint, call_userinfo_endpoint, call_introspect, call_revocation
+from .tokens import TokenValidator
+from .oauth_openid import call_userinfo_endpoint, call_introspect, call_revocation
 
 # GLOBALS
 config = Config()
@@ -46,26 +46,21 @@ def login_controller(request):
     }
     response = render(request, 'login.html', {'config': okta_config})
 
-    delete_cookies(response)
+    _delete_cookies(response)
 
     return response
 
 
 def callback_controller(request):
-    # Handles the token exchange from the redirect
-    def token_request(auth_code, nonce):
-        # Setup Token Request
+    def _token_request(auth_code, nonce):
+        validator = TokenValidator(config)
+        tokens = validator.call_token_endpoint(auth_code)
 
-        discovery_doc = DiscoveryDocument(config.issuer).getJson()
-        token_endpoint = discovery_doc['token_endpoint']
-
-        tokens = call_token_endpoint(token_endpoint, auth_code, config)
         user = None
-
         if tokens is not None:
             if 'id_token' in tokens:
                 # Perform token validation
-                claims = validate_token(tokens['id_token'], config, nonce)
+                claims = validator.validate_token(tokens['id_token'], nonce)
 
                 if claims:
                     token_manager.set_id_token(tokens['id_token'])
@@ -77,6 +72,21 @@ def callback_controller(request):
                 token_manager.set_access_token(tokens['access_token'])
 
         return user, token_manager.getJson()
+
+    def _validate_user(claims):
+        # Create user for django session
+        user = authenticate(
+            username=claims['email'],
+            password=claims['sub']
+        )
+        if user is None:
+            # Create user
+            new_user = User.objects.create_user(
+                claims['email'],
+                claims['email'],
+                claims['sub']
+            )
+        return user
 
     if request.POST:
         return HttpResponse({'error': 'Endpoint not supported'})
@@ -94,7 +104,7 @@ def callback_controller(request):
             raise Exception("Value {} does not match the assigned state".format(state))
             return redirect('/login')
 
-        user, token_manager_json = token_request(code, cookie_nonce)
+        user, token_manager_json = _token_request(code, cookie_nonce)
         request.session['tokens'] = token_manager_json
 
         if user is None:
@@ -170,25 +180,7 @@ def logout_controller(request):
     return redirect('/login')
 
 
-def _validate_user(claims):
-    # Create user for django session
-    user = authenticate(
-        username=claims['email'],
-        password=claims['sub']
-    )
-    if user is None:
-        # Create user
-        new_user = User.objects.create_user(
-            claims['email'],
-            claims['email'],
-            claims['sub']
-        )
-        print("Created User")
-
-    return user
-
-
-def delete_cookies(response):
+def _delete_cookies(response):
     # The Okta Signin Widget/Javascript SDK aka "Auth-JS" automatically generates state and nonce and stores them in
     # cookies. Delete authJS/widget cookies
     response.set_cookie('okta-oauth-state', '', max_age=1)
