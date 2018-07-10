@@ -13,13 +13,13 @@ If you do not have an Okta account, please [sign up here](https://www.okta.com/d
 
 #### Basic setup:
 *You may tweak settings later as you gain more familiarity with the Okta platform. For starting out however, simply follow these instructions closely*
-1. Under the **Applications** menu, click **Add Application** dropdown and select **Web**
+1. Under the **Applications** menu, click **Add Application** and select **Web**
 2. Click **Next**, then enter an Application **Name**. Then:
    * Set Base URIs to `http://localhost:8000/`
    * Add `http://localhost:8000/oauth2/callback` the list of *Redirect URIs*
-   * Leave the default Group assignments = **Everyone**
+   * Leave the default setting, Group assignments = **Everyone**
 3. Click **Done** to redirect back to the *General* tab of your application.
-4. Make note of the **Client ID** and **Client Secret**, as it will be needed for the client configuration.
+4. Make note of the **Client ID** and **Client Secret**, as it will be needed environment configuration
 5. Navigate to the **Dashboard** menu of your *Developer Console*. Make note of the **Org URL** value found on the top right-hand corner of the screen
 6. Edit the **.env** file included in this sample:
    - Provide the value for ORG_URL from step 5 above
@@ -45,6 +45,11 @@ Run migrations (In this sample we're simply using sqlite); Tables are needed for
 ```
 
 ### Run the Sample
+Source the environment variables (**.env** file)
+```
+    $ source .env
+```
+
 Start the web server with `python manage.py runserver`
 ```
     $ python manage.py runserver
