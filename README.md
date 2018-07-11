@@ -1,8 +1,9 @@
 # Okta OpenID Connect/OAuth2 Sample in Django
 
 This sample provides an example of using Okta to login to a Django application. 
-We use the [Okta Sign-In Widget](http://developer.okta.com/code/javascript/okta_sign-in_widget) to quickly add a login interface.
-And use Okta as an OpenID Connect Identity Provider.
+We use the [Okta Sign-In Widget](http://developer.okta.com/code/javascript/okta_sign-in_widget) to quickly add an Okta login interface to the Django app.
+Architecturally, Okta acts as an Identity Provider external to Django and integrates using OpenID Connect.
+We replate the @login_required decorator with a custom @okta_login_decorator, which checks if JWT token(s) were successfully retrieved from Okta.
 
 ### Note: Written in Python 3.6 and Django 2
 
