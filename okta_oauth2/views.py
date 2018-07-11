@@ -1,11 +1,13 @@
+from django.http import HttpResponseRedirect, HttpResponse
+from django.urls import reverse
 from django.shortcuts import render
-from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+#from django.contrib.auth.models import User
+#from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 from .models import DiscoveryDocument, Config, TokenManager
+from .decorators import okta_login_required
 
 import json
 from .tokens import TokenValidator
@@ -53,10 +55,11 @@ def login_controller(request):
 
 def callback_controller(request):
     def _token_request(auth_code, nonce):
+        # authorization_code flow. Exchange the auth_code for id_token and/or access_token
+
         validator = TokenValidator(config)
         tokens = validator.call_token_endpoint(auth_code)
 
-        user = None
         if tokens is not None:
             if 'id_token' in tokens:
                 # Perform token validation
@@ -64,33 +67,15 @@ def callback_controller(request):
 
                 if claims:
                     token_manager.set_id_token(tokens['id_token'])
-                    # Authenticate User
-                    user = _validate_user(claims)
                     token_manager.set_claims(claims)
 
             if 'access_token' in tokens:
                 token_manager.set_access_token(tokens['access_token'])
 
-        return user, token_manager.getJson()
-
-    def _validate_user(claims):
-        # Create user for django session
-        user = authenticate(
-            username=claims['email'],
-            password=claims['sub']
-        )
-        if user is None:
-            # Create user
-            new_user = User.objects.create_user(
-                claims['email'],
-                claims['email'],
-                claims['sub']
-            )
-        return user
+        return token_manager.getJson()
 
     if request.POST:
         return HttpResponse({'error': 'Endpoint not supported'})
-
     else:
         code = request.GET['code']
         state = request.GET['state']
@@ -102,24 +87,19 @@ def callback_controller(request):
         # Verify state
         if state != cookie_state:
             raise Exception("Value {} does not match the assigned state".format(state))
-            return redirect('/login')
+            return HttpResponseRedirect(reverse('login_controller'))
 
-        user, token_manager_json = _token_request(code, cookie_nonce)
+        token_manager_json = _token_request(code, cookie_nonce)
         request.session['tokens'] = token_manager_json
-
-        if user is None:
-            return redirect('/login')
-
-        login(request, user)
         return redirect('/')
 
 
-@login_required(redirect_field_name=None, login_url='/login')
+@okta_login_required
 def home_controller(request):
     return render(request, 'home.html', get_context(request))
 
 
-@login_required(redirect_field_name=None, login_url='/login')
+@okta_login_required
 def revocation_controller(request):
     # Calls the revocation endpoint for revoking the accessToken
     if request.POST:
@@ -135,10 +115,10 @@ def revocation_controller(request):
         else:
             request.session['revocation'] = json.dumps(revocation, indent=4)
 
-    return render(request, 'home.html', get_context(request))
+    return HttpResponseRedirect(reverse('home_controller'))
 
 
-@login_required(redirect_field_name=None, login_url='/login')
+@okta_login_required
 def introspect_controller(request):
     # Calls the introspect endpoint for checking the accessToken
 
@@ -153,10 +133,10 @@ def introspect_controller(request):
         if introspect is not None:
             request.session['introspect'] = json.dumps(introspect, indent=4)
 
-    return render(request, 'home.html', get_context(request))
+    return HttpResponseRedirect(reverse('home_controller'))
 
 
-@login_required(redirect_field_name=None, login_url='/login')
+@okta_login_required
 def userinfo_controller(request):
     # Calls userInfo endpoint with accessToken
 
@@ -170,14 +150,14 @@ def userinfo_controller(request):
         if userInfo is not None:
             request.session['userInfo'] = json.dumps(userInfo, indent=4)
 
-    return render(request, 'home.html', get_context(request))
+    return HttpResponseRedirect(reverse('home_controller'))
 
 
-@login_required(redirect_field_name=None, login_url='/login')
+@okta_login_required
 def logout_controller(request):
     logout(request)
     token_manager = None
-    return redirect('/login')
+    return HttpResponseRedirect(reverse('login_controller'))
 
 
 def _delete_cookies(response):

@@ -7,13 +7,13 @@ import requests
 
 class Config:
     # Configuration object
-    client_id = settings.CLIENT_ID
-    client_secret = settings.CLIENT_SECRET
     org_url = settings.ORG_URL
-    issuer = settings.ISSUER
 
     # OpenID Specific
     grant_type = 'authorization_code'
+    client_id = settings.CLIENT_ID
+    client_secret = settings.CLIENT_SECRET
+    issuer = settings.ISSUER
     scopes = settings.SCOPES
     redirect_uri = settings.REDIRECT_URI
 

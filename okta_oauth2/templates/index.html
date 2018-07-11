@@ -23,11 +23,9 @@
           <!-- Right Justified Nav -->
           <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-              <form action="/logout" method="GET">{% csrf_token %}
-                {% if active %}
-                <li> <td > <button class="navbar-brand" type="submit" style="font-size:20px; border:none; background:none;">Sign Out</button></li>
-                {% endif %}
-              </form>
+              {% if active %}
+              <li><a href="{% url 'logout_controller' %}">Logout</a></li>
+              {% endif %}
             </ul>
           </div>
         </div>
