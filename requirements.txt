@@ -1,0 +1,14 @@
+certifi==2018.4.16
+chardet==3.0.4
+Django==2.1.5
+ecdsa==0.13
+future==0.16.0
+idna==2.7
+pyasn1==0.4.3
+PyJWT==1.6.4
+python-jose==3.0.0
+pytz==2018.5
+requests==2.20.0
+rsa==3.4.2
+six==1.11.0
+urllib3==1.23
