@@ -33,7 +33,7 @@ If you do not have an Okta account, please [sign up here](https://www.okta.com/d
    - Provide values for CLIENT_ID and CLIENT_SECRET, both obtained in step 4 above
    - Leave the values for SCOPES and REDIRECT_URI as-is
 7. Enable [CORS access](https://developer.okta.com/docs/api/getting_started/enabling_cors) to your Okta org
-   - In the navigation manu, select **API** then **Trusted Origins**
+   - In the navigation menu, select **API** then **Trusted Origins**
    - Click **Add Origin**
    - Set **Origin URL** = `http://localhost:8000` and check the box **CORS**
    - Save
