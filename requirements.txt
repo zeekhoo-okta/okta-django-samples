@@ -1,6 +1,6 @@
 certifi==2018.4.16
 chardet==3.0.4
-Django==2.1.7
+Django==2.1.11
 ecdsa==0.13
 future==0.16.0
 idna==2.7
