@@ -43,6 +43,11 @@ def call_revocation(issuer, token, config):
         return r.status_code
 
 
+def get_logout_endpoint(issuer, id_token, redirect_uri):
+    return "{0}/v1/logout?id_token_hint={1}&post_logout_redirect_uri={2}".format(
+        issuer, id_token, redirect_uri.split("/oauth2")[0])
+
+
 def _build_header(config):
     # Builds the header for sending requests
 

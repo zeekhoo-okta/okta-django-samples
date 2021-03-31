@@ -11,7 +11,7 @@ from .decorators import okta_login_required
 
 import json
 from .tokens import TokenValidator
-from .oauth_openid import call_userinfo_endpoint, call_introspect, call_revocation
+from .oauth_openid import call_userinfo_endpoint, call_introspect, call_revocation, get_logout_endpoint
 
 # GLOBALS
 config = Config()
@@ -168,8 +168,8 @@ def userinfo_controller(request):
 @okta_login_required
 def logout_controller(request):
     logout(request)
-    token_manager = None
-    return HttpResponseRedirect(reverse('login_controller'))
+    return HttpResponseRedirect(get_logout_endpoint(
+        config.issuer, token_manager.getJson()["idToken"], config.redirect_uri))
 
 
 def _get_user_by_username(username):

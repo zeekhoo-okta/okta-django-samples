@@ -22,7 +22,8 @@ If you do not have an Okta account, please [sign up here](https://www.okta.com/d
 1. Under the **Applications** menu, click **Add Application** and select **Web**
 2. Click **Next**, then enter an Application **Name**. Then:
    * Set Base URIs to `http://localhost:8000/`
-   * Add `http://localhost:8000/oauth2/callback/` the list of *Redirect URIs*
+   * Add `http://localhost:8000/oauth2/callback/` the list of *Login Redirect URIs*
+   * Add `http://localhost:8000` to the list of *Logout Redirect URIs*  
    * Leave the default setting, Group assignments = **Everyone**
 3. Click **Done** to redirect back to the *General* tab of your application.
 4. Make note of the **Client ID** and **Client Secret**, as it will be needed environment configuration
