@@ -8,7 +8,7 @@ pyasn1==0.4.3
 PyJWT==1.6.4
 python-jose==3.0.0
 pytz==2018.5
-requests==2.21.0
+requests==2.25.1
 rsa==4.7
 six==1.11.0
 urllib3==1.26.5
